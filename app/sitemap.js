@@ -1,0 +1,1 @@
+export default function sitemap(){return [{url:"http://localhost:3000/"},{url:"http://localhost:3000/apartments"},{url:"http://localhost:3000/about"},{url:"http://localhost:3000/admin"}]}
