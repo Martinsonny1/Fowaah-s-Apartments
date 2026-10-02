@@ -1,32 +1,27 @@
 # Fowaah's Apartments
 
-Production-oriented Next.js starter for Fowaah's Apartments, based on the supplied website specification.
+Next.js site for Fowaah's Apartments, backed by Supabase (database, login, image storage).
 
-## Included
-- Mobile-first public Home, Apartments, Apartment Detail, and About & Contact pages
-- Responsive navigation and floating call/WhatsApp actions
-- Ghana Cedi / USD display toggle
-- Search and filters for city, listing type, bedrooms, budget, amenities and furnishing
-- 9 seeded apartment examples (3 each for Accra, Kumasi and Cape Coast)
-- Apartment detail gallery, enquiry form and WhatsApp/phone actions
-- Admin dashboard UI at `/admin`
-- Listing workflow UI: Draft → Pending Review → Published → Rented/Sold → Archived
-- Enquiries inbox, content/settings, users and activity-log screens
-- Local demo data fallback so the site runs immediately without Supabase
-- Easy path to connect Supabase using `.env.local`
+## What uses Supabase
+- Listings: public pages, search filters, detail pages and the sitemap read **Published** apartments from the `apartments` table.
+- Enquiries: the enquiry form saves to the `enquiries` table (visible only in the admin).
+- Admin (`/admin`): Supabase Auth login. Only people listed in the `profiles` table can enter. Add, edit, publish, feature and delete listings, upload images, and manage enquiries.
+- Row Level Security enforces all of this in the database, not just in the UI.
 
-## Run
-```bash
-npm install
-npm run dev
-```
-Open http://localhost:3000.
+## Setup
+1. Create a project at supabase.com.
+2. SQL Editor: run `supabase/schema.sql`, then `supabase/seed.sql` (the 9 starter listings).
+3. Authentication > Users > Add user (tick Auto Confirm), then run in the SQL Editor:
+   ```sql
+   insert into public.profiles (id, email, role)
+   select id, email, 'admin' from auth.users where email = 'YOUR-EMAIL@example.com';
+   ```
+4. Authentication > Sign In / Providers: switch off "Allow new users to sign up".
+5. Copy `.env.example` to `.env.local` and fill in the project URL and anon/publishable key.
+6. `npm install` then `npm run dev`, and open http://localhost:3000. Admin login: http://localhost:3000/admin
+7. On Vercel add the same two variables (Settings > Environment Variables) and redeploy.
 
-## Demo admin
-The demo admin interface is available at `/admin`. It is intentionally a frontend demo when no backend is configured. For production, connect Supabase and enforce authentication/role checks server-side.
-
-## Environment
-Copy `.env.example` to `.env.local` and add Supabase credentials when implementing production persistence/auth/storage.
-
-## Production hardening
-Before launch, connect Supabase Auth + PostgreSQL + Storage, protect `/admin` with server-side role-based permissions, add rate limiting/anti-spam, HTTPS-only cookies, server-side input validation, audit logging, and real image uploads.
+## Notes
+- Public pages refresh every 60 seconds; admin changes also refresh them immediately.
+- Never put the `service_role` / secret key in this project.
+- Before launch: add rate limiting for the enquiry form and replace remaining Unsplash images with your own.
