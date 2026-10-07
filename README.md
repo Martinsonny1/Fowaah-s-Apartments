@@ -1,6 +1,5 @@
 # Fowaah's Apartments
 
-editing instructions
 Next.js site for Fowaah's Apartments, backed by Supabase (database, login, image storage).
 
 ## What uses Supabase
@@ -62,3 +61,6 @@ Record one smooth walkthrough: entrance → living room → kitchen → bedroom 
 
 ### Important hosting note
 The current implementation stores the original uploaded video in Supabase Storage and enforces a 50 MB upload limit. It does **not** transcode/compress the file server-side. For best performance, record short 720p/1080p clips and keep them small. Automatic transcoding can be added later with a dedicated video-processing service.
+
+### Video retrieval fix
+The site now reads apartment videos with direct queries to `apartment_videos` rather than relying on Supabase nested relationship expansion. Saved video tours therefore appear reliably in the Admin editor, apartment listings, and apartment detail pages.
