@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { X, Video, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { saveApartment, saveApartmentVideo, deleteApartmentVideo } from "../actions";
@@ -13,6 +14,7 @@ function Field({ label, children, wide }) {
 }
 
 export default function ListingForm({ initial, onClose }) {
+  const router = useRouter();
   const [f, setF] = useState({
     title: initial?.title ?? "",
     city: initial?.city ?? "Accra",
@@ -123,9 +125,16 @@ export default function ListingForm({ initial, onClose }) {
         if (upErr) { setVideoUploading(false); return setError(`Video upload failed: ${upErr.message}`); }
         const publicUrl = supabase.storage.from("apartment-videos").getPublicUrl(path).data.publicUrl;
         const videoRes = await saveApartmentVideo({ apartment_id: apartmentId, video_url: publicUrl, storage_path: path, duration_seconds: videoDuration, caption: "Apartment walkthrough" });
+        if (!videoRes?.ok) {
+          await supabase.storage.from("apartment-videos").remove([path]);
+          setVideoUploading(false);
+          return setError(videoRes?.error ?? "The video uploaded, but its database record could not be saved. No video was left behind.");
+        }
+        setF((p) => ({ ...p, video: videoRes.video ?? { video_url: publicUrl, storage_path: path, duration_seconds: videoDuration, caption: "Apartment walkthrough" } }));
+        setVideoFile(null);
         setVideoUploading(false);
-        if (!videoRes?.ok) return setError(videoRes?.error ?? "Video was uploaded but could not be saved.");
       }
+      router.refresh();
       onClose();
     });
   }

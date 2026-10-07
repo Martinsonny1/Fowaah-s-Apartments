@@ -120,12 +120,41 @@ export async function saveApartmentVideo(input) {
   const caption = String(input?.caption ?? "").trim().slice(0, 160) || null;
   const storagePath = String(input?.storage_path ?? "").trim() || null;
 
-  const { data: old } = await supabase.from("apartment_videos").select("storage_path").eq("apartment_id", apartmentId).maybeSingle();
-  const { error } = await supabase.from("apartment_videos").upsert({ apartment_id: apartmentId, video_url: videoUrl, storage_path: storagePath, poster_url: posterUrl, caption, duration_seconds: Math.round(duration), sort_order: 0 }, { onConflict: "apartment_id" });
-  if (error) return { ok: false, error: error.message };
-  if (old?.storage_path && old.storage_path !== storagePath) await supabase.storage.from("apartment-videos").remove([old.storage_path]);
+  const { data: apartment, error: apartmentError } = await supabase.from("apartments").select("id").eq("id", apartmentId).maybeSingle();
+  if (apartmentError) return { ok: false, error: `Could not verify the apartment: ${apartmentError.message}` };
+  if (!apartment) return { ok: false, error: "That apartment could not be found." };
+
+  const { data: old, error: oldError } = await supabase.from("apartment_videos").select("storage_path").eq("apartment_id", apartmentId).maybeSingle();
+  if (oldError && !/no rows|not found/i.test(oldError.message)) {
+    return { ok: false, error: `Could not read the existing video record: ${oldError.message}. Make sure supabase/video_migration.sql has been run.` };
+  }
+
+  const payload = {
+    apartment_id: apartmentId,
+    video_url: videoUrl,
+    storage_path: storagePath,
+    poster_url: posterUrl,
+    caption,
+    duration_seconds: Math.round(duration),
+    sort_order: 0,
+  };
+
+  const { data: savedVideo, error } = await supabase
+    .from("apartment_videos")
+    .upsert(payload, { onConflict: "apartment_id" })
+    .select("id, apartment_id, video_url, storage_path, poster_url, caption, duration_seconds, sort_order, created_at, updated_at")
+    .single();
+
+  if (error) {
+    return { ok: false, error: `Video database save failed: ${error.message}. If this is the first time using video tours, run supabase/video_migration.sql in your existing Supabase project.` };
+  }
+
+  if (!savedVideo?.id) return { ok: false, error: "Supabase did not return the saved video record." };
+  if (old?.storage_path && old.storage_path !== storagePath) {
+    await supabase.storage.from("apartment-videos").remove([old.storage_path]);
+  }
   refreshSite(apartmentId);
-  return { ok: true };
+  return { ok: true, video: savedVideo };
 }
 
 export async function deleteApartmentVideo(apartmentId) {

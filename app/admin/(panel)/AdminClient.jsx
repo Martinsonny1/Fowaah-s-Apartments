@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { LayoutDashboard, Building2, Inbox, Users, Settings, Activity, Plus, Star, Pencil, Trash2, LogOut, Phone, MessageCircle } from "lucide-react";
 import ListingForm from "./ListingForm";
 import BrandLogo from "@/components/BrandLogo";
@@ -20,6 +21,7 @@ function whatsappLink(phone) {
 }
 
 export default function AdminClient({ apartments, enquiries, staleEnquiries, email }) {
+  const router = useRouter();
   const [tab, setTab] = useState("Dashboard");
   const [editing, setEditing] = useState(null); // null | "new" | apartment
   const [notice, setNotice] = useState("");
@@ -87,11 +89,12 @@ export default function AdminClient({ apartments, enquiries, staleEnquiries, ema
         {tab === "Listings" && (
           <div className="card mt-7 overflow-auto">
             <table className="w-full text-sm">
-              <thead><tr className="text-left bg-gray-50"><th className="p-4">Property</th><th>City</th><th>Type</th><th>Price</th><th>Status</th><th className="pr-4">Actions</th></tr></thead>
+              <thead><tr className="text-left bg-gray-50"><th className="p-4">Property</th><th>Video</th><th>City</th><th>Type</th><th>Price</th><th>Status</th><th className="pr-4">Actions</th></tr></thead>
               <tbody>
                 {apartments.map((a) => (
                   <tr className="border-t" key={a.id}>
                     <td className="p-4 font-bold">{a.title}</td>
+                    <td>{a.video ? <span className="badge badge-green">✓ Video</span> : <span className="badge badge-grey">No video</span>}</td>
                     <td>{a.city}</td>
                     <td>{a.listing_type}</td>
                     <td>GH₵ {a.price.toLocaleString()}</td>
@@ -107,7 +110,7 @@ export default function AdminClient({ apartments, enquiries, staleEnquiries, ema
                     </td>
                   </tr>
                 ))}
-                {!apartments.length && <tr><td className="p-6 muted" colSpan={6}>No listings yet. Click "Add New Apartment".</td></tr>}
+                {!apartments.length && <tr><td className="p-6 muted" colSpan={7}>No listings yet. Click "Add New Apartment".</td></tr>}
               </tbody>
             </table>
           </div>
@@ -151,7 +154,7 @@ export default function AdminClient({ apartments, enquiries, staleEnquiries, ema
         )}
       </main>
 
-      {editing && <ListingForm key={editing === "new" ? "new" : editing.id} initial={editing === "new" ? null : editing} onClose={() => setEditing(null)} />}
+      {editing && <ListingForm key={editing === "new" ? "new" : editing.id} initial={editing === "new" ? null : editing} onClose={() => { setEditing(null); router.refresh(); }} />}
     </div>
   );
 }

@@ -17,6 +17,28 @@ create table if not exists public.apartment_videos (
   updated_at       timestamptz not null default now()
 );
 
+-- If an earlier video table was created without these columns/constraints, bring it up to date.
+alter table public.apartment_videos add column if not exists storage_path text;
+alter table public.apartment_videos add column if not exists poster_url text;
+alter table public.apartment_videos add column if not exists caption text;
+alter table public.apartment_videos add column if not exists duration_seconds int;
+alter table public.apartment_videos add column if not exists sort_order int not null default 0;
+alter table public.apartment_videos add column if not exists created_at timestamptz not null default now();
+alter table public.apartment_videos add column if not exists updated_at timestamptz not null default now();
+
+-- One video per apartment for this admin workflow.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'apartment_videos_apartment_id_key'
+      and conrelid = 'public.apartment_videos'::regclass
+  ) then
+    alter table public.apartment_videos add constraint apartment_videos_apartment_id_key unique (apartment_id);
+  end if;
+exception when duplicate_table then null;
+end $$;
+
 create index if not exists apartment_videos_apartment_idx on public.apartment_videos (apartment_id);
 
 create or replace function public.set_apartment_video_updated_at()
