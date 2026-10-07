@@ -1,0 +1,10 @@
+{
+  "name": "Fowaah’s Apartments",
+  "short_name": "Fowaah’s",
+  "description": "Apartments for rent and sale in Ghana.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF8F2",
+  "theme_color": "#081C4D",
+  "icons": [{"src":"/favicon.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]
+}

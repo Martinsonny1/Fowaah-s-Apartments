@@ -10,6 +10,7 @@ export const metadata = {
     description: "Apartment, renting and Ghana living guides from Fowaah's Apartments.",
     url: "https://fowaah-s-apartments.vercel.app/blog",
     type: "website",
+    images: [{ url: "/social-preview.png", width: 1200, height: 630, alt: "Fowaah's Apartments" }],
   },
 };
 

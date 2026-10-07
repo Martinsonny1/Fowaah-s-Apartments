@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { LayoutDashboard, Building2, Inbox, Users, Settings, Activity, Plus, Star, Pencil, Trash2, LogOut, Phone, MessageCircle } from "lucide-react";
 import ListingForm from "./ListingForm";
+import BrandLogo from "@/components/BrandLogo";
 import { setApartmentStatus, toggleFeatured, deleteApartment, setEnquiryStatus, signOut } from "../actions";
 
 const STATUSES = ["Draft", "Pending Review", "Published", "Rented", "Sold", "Archived"];
@@ -39,7 +40,7 @@ export default function AdminClient({ apartments, enquiries, staleEnquiries, ema
   return (
     <div className="min-h-screen bg-[#f5f5f2] flex">
       <aside className="w-64 bg-[#081C4D] text-white hidden md:flex flex-col p-5 sticky top-0 h-screen">
-        <div className="text-xl font-black mb-8">FOWAAH'S<br /><span className="text-[#C9A24A]">ADMIN</span></div>
+        <div className="mb-8"><BrandLogo imageClassName="w-[190px] h-[110px]" sizes="190px" /><div className="mt-2 text-xs font-black tracking-[.22em] text-[#C9A24A]">ADMIN DASHBOARD</div></div>
         {NAV.map(([n, I]) => (
           <button key={n} onClick={() => setTab(n)} className={`w-full flex items-center gap-3 p-3 rounded-lg text-left mb-1 ${tab === n ? "bg-[#C9A24A] text-[#081C4D]" : "text-white/80"}`}>
             <I size={17} />{n}
