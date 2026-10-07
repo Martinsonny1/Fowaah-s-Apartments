@@ -19,3 +19,9 @@ a{text-decoration:none;color:inherit}.container{width:min(1180px,calc(100% - 32p
 .hero-frame{border:2px solid var(--gold);border-radius:18px;overflow:hidden;box-shadow:0 18px 45px #081c4d18}
 .hero-frame img{width:100%;display:block;aspect-ratio:16/7;object-fit:cover}
 .badge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800}.badge-green{background:#e3f5e9;color:#19733d}.badge-red{background:#fbe6e3;color:#962b20}.badge-amber{background:#fff1cf;color:#865e00}.badge-grey{background:#eee;color:#555}
+
+.prose-fowaah{font-size:1.05rem;line-height:1.85;color:#3f3f3f}
+.prose-fowaah p{margin:0 0 1.25rem}
+.prose-fowaah h2{font-size:clamp(1.45rem,3vw,2rem);line-height:1.25;font-weight:900;color:var(--navy);margin:2.5rem 0 .8rem}
+.prose-fowaah section:first-of-type h2{margin-top:2rem}
+@media(max-width:640px){.prose-fowaah{font-size:1rem}}

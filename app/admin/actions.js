@@ -108,6 +108,37 @@ export async function saveApartment(input) {
   return { ok: true, id };
 }
 
+export async function saveApartmentVideo(input) {
+  const { supabase, isAdmin } = await getAdmin();
+  if (!isAdmin) return NOT_ADMIN;
+  const apartmentId = String(input?.apartment_id ?? "").trim();
+  const videoUrl = String(input?.video_url ?? "").trim();
+  if (!apartmentId || !/^https?:\/\//i.test(videoUrl)) return { ok: false, error: "A valid apartment and video URL are required." };
+  const duration = Number(input?.duration_seconds);
+  if (!Number.isFinite(duration) || duration <= 0 || duration > 30) return { ok: false, error: "Video must be 30 seconds or shorter." };
+  const posterUrl = String(input?.poster_url ?? "").trim() || null;
+  const caption = String(input?.caption ?? "").trim().slice(0, 160) || null;
+  const storagePath = String(input?.storage_path ?? "").trim() || null;
+
+  const { data: old } = await supabase.from("apartment_videos").select("storage_path").eq("apartment_id", apartmentId).maybeSingle();
+  const { error } = await supabase.from("apartment_videos").upsert({ apartment_id: apartmentId, video_url: videoUrl, storage_path: storagePath, poster_url: posterUrl, caption, duration_seconds: Math.round(duration), sort_order: 0 }, { onConflict: "apartment_id" });
+  if (error) return { ok: false, error: error.message };
+  if (old?.storage_path && old.storage_path !== storagePath) await supabase.storage.from("apartment-videos").remove([old.storage_path]);
+  refreshSite(apartmentId);
+  return { ok: true };
+}
+
+export async function deleteApartmentVideo(apartmentId) {
+  const { supabase, isAdmin } = await getAdmin();
+  if (!isAdmin) return NOT_ADMIN;
+  const { data: old } = await supabase.from("apartment_videos").select("storage_path").eq("apartment_id", apartmentId).maybeSingle();
+  const { error } = await supabase.from("apartment_videos").delete().eq("apartment_id", apartmentId);
+  if (error) return { ok: false, error: error.message };
+  if (old?.storage_path) await supabase.storage.from("apartment-videos").remove([old.storage_path]);
+  refreshSite(apartmentId);
+  return { ok: true };
+}
+
 export async function setApartmentStatus(id, status) {
   const { supabase, isAdmin } = await getAdmin();
   if (!isAdmin) return NOT_ADMIN;
