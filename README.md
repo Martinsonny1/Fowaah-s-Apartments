@@ -1,5 +1,6 @@
 # Fowaah's Apartments
 
+editing instructions
 Next.js site for Fowaah's Apartments, backed by Supabase (database, login, image storage).
 
 ## What uses Supabase
